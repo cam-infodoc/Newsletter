@@ -18,7 +18,7 @@ body {
 .badge-row {
     display: flex;
     align-items: center;
-    gap: 10px; /* espace entre rectangle et nom */
+    gap: 10px;
     position: relative;
 }
 
@@ -29,7 +29,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #ccc; /* gris par défaut */
+    background-color: #ccc;
     opacity: 0.5;
     transition: all 0.3s ease;
 }
@@ -95,60 +95,67 @@ const firebaseConfig = {
   storageBucket: "info-newsletter-43e61.firebasestorage.app",
   messagingSenderId: "668179612236",
   appId: "1:668179612236:web:3521121d19b62bf8a06ae9"
-
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Récupérer uid et badge depuis l'URL
+// Récupérer paramètres depuis l'URL
 const urlParams = new URLSearchParams(window.location.search);
 const uid = urlParams.get('uid');
-const badgeParam = urlParams.get('badge'); // facultatif
+const badgeParam = urlParams.get('badge'); // badge direct
+const incrementRead = urlParams.get('incrementRead'); // Lecteur automatique
 
 if(uid){
     const userRef = db.collection('users').doc(uid);
 
     userRef.get().then(doc => {
         if(doc.exists){
-            // Document existe : update badges
-            const data = doc.data();
-            const badges = data.badges || [];
+            let data = doc.data();
+            let badges = data.badges || [];
 
+            // Badge direct
             if(badgeParam && !badges.includes(badgeParam)){
                 badges.push(badgeParam);
-                userRef.update({
-                    badges: badges,
-                    lastBadge: badgeParam
-                });
-            } else if (badgeParam){
-                // même badge déjà présent : juste update lastBadge
-                userRef.update({
-                    lastBadge: badgeParam
-                });
+                userRef.update({ badges: badges, lastBadge: badgeParam });
+            } else if(badgeParam){
+                userRef.update({ lastBadge: badgeParam });
+            }
+
+            // Lecteur automatique
+            if(incrementRead === 'true'){
+                let count = data.newslettersRead || 0;
+                count++;
+                if(count >= 3 && !badges.includes('lecteur')){
+                    badges.push('lecteur');
+                    userRef.update({ newslettersRead: count, badges: badges, lastBadge: 'lecteur' });
+                    displayBadges(badges, 'lecteur');
+                } else {
+                    userRef.update({ newslettersRead: count });
+                }
             }
 
             displayBadges(badges, badgeParam);
 
         } else {
-            // Document n'existe pas : créer avec le badge
+            // Document n'existe pas : créer
             const badges = badgeParam ? [badgeParam] : [];
-            userRef.set({
-                email: "test@example.com", // facultatif
+            db.collection('users').doc(uid).set({
+                email: "test@example.com",
                 badges: badges,
                 lastBadge: badgeParam || "",
-                newslettersRead: 0
+                newslettersRead: incrementRead === 'true' ? 1 : 0
             });
             displayBadges(badges, badgeParam);
         }
     });
 }
 
-// Fonction pour afficher visuellement les badges et la récompense
+// Fonction pour afficher les badges et récompenses
 function displayBadges(badges, lastBadge){
     badges.forEach(b => {
         const elem = document.getElementById(b);
-        if(elem) {
+        if(elem){
             elem.querySelector('.badge').classList.add('unlocked');
             elem.classList.add('unlocked');
         }
@@ -158,8 +165,8 @@ function displayBadges(badges, lastBadge){
         const rewardTextMap = {
             explorateur: 'Vous avez obtenu le badge Explorateur en lisant notre Newsletter, bravo ! Pour vous remercier nous vous offrons un mini-guide bonus gratuit !',
             lecteur: 'Vous avez obtenu le badge Lecteur en lisant 3 de nos Newsletter, bravo ! Pour vous remercier nous vous offrons un code promotionnel de -5% sur l un de nos Guides PDF de VOTRE choix. Choisissez l un de nos Guides et entre le code promo INFO5 pour en bénéficier à tout moment.',
-            confiance: 'Vous avez obtenu le badge Confiance en ayant cliqué sur l astuce présente dans notre Newsletter, bravo ! Pour vous remercier nous vous offrons un code promotionnel de 2€ sur l un de nos Guides PDF de VOTRE choix. Choisissez l un de nos Guides et entrez le code promo ASTUCE2 pour en bénéficier à tout moment.',
-            premium: 'Vous avez obtenu le badge Premium en ayant acheté l un de nos PDF gratuit par le biais de notre Newsletter, bravo ! Pour vous remercier nous vous offrons gratuitement un l un de nos Guides PDF de VOTRE choix. Choisissez l un de nos Guides et entrez le code promo INFOFREE pour en bénéficier à tout moment.'
+            confiance: 'Vous avez obtenu le badge Confiance en ayant cliqué sur l astuce présente dans notre Newsletter, bravo ! Pour vous remercier nous vous offrons un code promotionnel de -2€ sur l un de nos Guides PDF de VOTRE choix. Choisissez  l un de nos Guides et entrez le code promo ASTUCE2 pour en bénéficier à tout moment.',
+            premium: 'Vous avez obtenu le badge Premium en ayant acheté l un de nos PDF gratuit par le biais de notre Newsletter, bravo ! Pour vous remercier nous vous offrons gratuitement un l un de nos Guides PDF de VOTRE choix. Choisissez  l un de nos Guides et entrez le code promo INFOFREE pour en bénéficier à tout moment.'
         };
         const rewardDisplay = document.getElementById(lastBadge).querySelector('.badge-reward-display');
         rewardDisplay.textContent = rewardTextMap[lastBadge];

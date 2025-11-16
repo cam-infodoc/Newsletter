@@ -34,7 +34,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0; /* remplacé dynamiquement par la couleur du badge */
+    background-color: #f0f0f0;
     opacity: 0.5;
     transition: all 0.3s ease;
 }
@@ -103,18 +103,18 @@ body {
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyDHejsrQWjX3pab9M3_ybs-ULWFFxuHOcs",
-  authDomain: "info-newsletter-43e61.firebaseapp.com",
-  projectId: "info-newsletter-43e61",
-  storageBucket: "info-newsletter-43e61.firebasestorage.app",
-  messagingSenderId: "668179612236",
-  appId: "1:668179612236:web:3521121d19b62bf8a06ae9"
+  apiKey: "TON_API_KEY",
+  authDomain: "TON_AUTH_DOMAIN",
+  projectId: "TON_PROJECT_ID",
+  storageBucket: "TON_STORAGE_BUCKET",
+  messagingSenderId: "TON_MSG_ID",
+  appId: "TON_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Récupérer uid depuis l'URL
+// Récupérer uid et badge depuis l'URL
 const urlParams = new URLSearchParams(window.location.search);
 const uid = urlParams.get('uid');
 const badgeParam = urlParams.get('badge'); // facultatif
@@ -122,41 +122,59 @@ const badgeParam = urlParams.get('badge'); // facultatif
 if(uid){
     const userRef = db.collection('users').doc(uid);
 
-    // Mettre à jour badge si badgeParam présent
-    if(badgeParam){
-        userRef.update({
-            badges: firebase.firestore.FieldValue.arrayUnion(badgeParam),
-            lastBadge: badgeParam
-        });
-    }
-
-    // Récupérer badges
     userRef.get().then(doc => {
         if(doc.exists){
+            // Document existe : update badges
             const data = doc.data();
             const badges = data.badges || [];
-            const lastBadge = data.lastBadge || null;
 
-            // Débloquer badges visuellement
-            badges.forEach(b => {
-                const elem = document.getElementById(b);
-                if(elem) elem.querySelector('.badge').classList.add('unlocked');
-            });
-
-            // Afficher la récompense du dernier badge
-            const rewardDisplay = document.getElementById('reward-display');
-            if(lastBadge){
-                let rewardText = '';
-                switch(lastBadge){
-                    case 'explorateur': rewardText = 'Mini-guide bonus PDF'; break;
-                    case 'lecteur': rewardText = 'Code promo -5% sur un Guide PDF (INFO5)'; break;
-                    case 'confiance': rewardText = 'Code promo -2€ sur un Guide PDF (ASTUCE2)'; break;
-                    case 'premium': rewardText = 'PDF gratuit (INFOFREE)'; break;
-                }
-                rewardDisplay.textContent = rewardText;
+            if(badgeParam && !badges.includes(badgeParam)){
+                badges.push(badgeParam);
+                userRef.update({
+                    badges: badges,
+                    lastBadge: badgeParam
+                });
+            } else if (badgeParam){
+                // même badge déjà présent : juste update lastBadge
+                userRef.update({
+                    lastBadge: badgeParam
+                });
             }
+
+            displayBadges(badges, badgeParam);
+
+        } else {
+            // Document n'existe pas : créer avec le badge
+            const badges = badgeParam ? [badgeParam] : [];
+            userRef.set({
+                email: "test@example.com", // facultatif
+                badges: badges,
+                lastBadge: badgeParam || "",
+                newslettersRead: 0
+            });
+            displayBadges(badges, badgeParam);
         }
     });
+}
+
+// Fonction pour afficher visuellement les badges et la récompense
+function displayBadges(badges, lastBadge){
+    badges.forEach(b => {
+        const elem = document.getElementById(b);
+        if(elem) elem.querySelector('.badge').classList.add('unlocked');
+    });
+
+    if(lastBadge){
+        const rewardDisplay = document.getElementById('reward-display');
+        let rewardText = '';
+        switch(lastBadge){
+            case 'explorateur': rewardText = 'Mini-guide bonus PDF'; break;
+            case 'lecteur': rewardText = 'Code promo -5% sur un Guide PDF (INFO5)'; break;
+            case 'confiance': rewardText = 'Code promo -2€ sur un Guide PDF (ASTUCE2)'; break;
+            case 'premium': rewardText = 'PDF gratuit (INFOFREE)'; break;
+        }
+        rewardDisplay.textContent = rewardText;
+    }
 }
 </script>
 

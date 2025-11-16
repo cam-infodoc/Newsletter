@@ -6,36 +6,64 @@
 <style>
 body {
     font-family: Arial, sans-serif;
+    padding: 20px;
 }
+
 .badges-wrapper {
     display: flex;
     align-items: flex-start;
     gap: 40px;
 }
-.badges-list .badge {
+
+.badges-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* espace entre rectangle et nom */
+}
+
+.badge {
     width: 80px;
     height: 80px;
     border-radius: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 15px;
+    background-color: #f0f0f0; /* remplacé dynamiquement par la couleur du badge */
     opacity: 0.5;
     transition: all 0.3s ease;
 }
-.badges-list .badge.unlocked {
+
+.badge.unlocked {
     opacity: 1;
     transform: scale(1.1);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
 }
-#explorateur { background-color: #FFF9C4; }
-#lecteur { background-color: #BBDEFB; }
-#confiance { background-color: #FFE0B2; }
-#premium { background-color: #E1BEE7; }
 
-.badge-name { text-align: center; margin-top: 5px; font-weight: bold; }
-.badge-reward-display { font-size: 16px; font-weight: bold; min-width: 200px; }
-.icon { font-size: 40px; }
+#explorateur .badge { background-color: #FFF9C4; }
+#lecteur .badge { background-color: #BBDEFB; }
+#confiance .badge { background-color: #FFE0B2; }
+#premium .badge { background-color: #E1BEE7; }
+
+.badge-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.badge-reward-display {
+    font-size: 16px;
+    font-weight: bold;
+    min-width: 200px;
+}
+
+.icon {
+    font-size: 40px;
+}
 </style>
 </head>
 <body>
@@ -43,10 +71,30 @@ body {
 <h2>Mes Badges</h2>
 <div class="badges-wrapper">
     <div class="badges-list">
-        <div class="badge" id="explorateur"><span class="icon">⭐</span><div class="badge-name">Explorateur</div></div>
-        <div class="badge" id="lecteur"><span class="icon">📘</span><div class="badge-name">Lecteur</div></div>
-        <div class="badge" id="confiance"><span class="icon">🔒</span><div class="badge-name">Confiance</div></div>
-        <div class="badge" id="premium"><span class="icon">👑</span><div class="badge-name">Premium</div></div>
+        <div class="badge-row" id="explorateur">
+            <div class="badge">
+                <span class="icon">⭐</span>
+            </div>
+            <div class="badge-name">Explorateur</div>
+        </div>
+        <div class="badge-row" id="lecteur">
+            <div class="badge">
+                <span class="icon">📘</span>
+            </div>
+            <div class="badge-name">Lecteur</div>
+        </div>
+        <div class="badge-row" id="confiance">
+            <div class="badge">
+                <span class="icon">🔒</span>
+            </div>
+            <div class="badge-name">Confiance</div>
+        </div>
+        <div class="badge-row" id="premium">
+            <div class="badge">
+                <span class="icon">👑</span>
+            </div>
+            <div class="badge-name">Premium</div>
+        </div>
     </div>
     <div class="badge-reward-display" id="reward-display"></div>
 </div>
@@ -55,12 +103,12 @@ body {
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "TON_API_KEY",
-  authDomain: "TON_AUTH_DOMAIN",
-  projectId: "TON_PROJECT_ID",
-  storageBucket: "TON_STORAGE_BUCKET",
-  messagingSenderId: "TON_MSG_ID",
-  appId: "TON_APP_ID"
+  apiKey: "AIzaSyDHejsrQWjX3pab9M3_ybs-ULWFFxuHOcs",
+  authDomain: "info-newsletter-43e61.firebaseapp.com",
+  projectId: "info-newsletter-43e61",
+  storageBucket: "info-newsletter-43e61.firebasestorage.app",
+  messagingSenderId: "668179612236",
+  appId: "1:668179612236:web:3521121d19b62bf8a06ae9"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -92,7 +140,7 @@ if(uid){
             // Débloquer badges visuellement
             badges.forEach(b => {
                 const elem = document.getElementById(b);
-                if(elem) elem.classList.add('unlocked');
+                if(elem) elem.querySelector('.badge').classList.add('unlocked');
             });
 
             // Afficher la récompense du dernier badge

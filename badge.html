@@ -9,12 +9,6 @@ body {
     padding: 20px;
 }
 
-.badges-wrapper {
-    display: flex;
-    align-items: flex-start;
-    gap: 40px;
-}
-
 .badges-list {
     display: flex;
     flex-direction: column;
@@ -25,6 +19,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px; /* espace entre rectangle et nom */
+    position: relative;
 }
 
 .badge {
@@ -34,21 +29,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0;
+    background-color: #ccc; /* gris par défaut */
     opacity: 0.5;
     transition: all 0.3s ease;
 }
 
 .badge.unlocked {
     opacity: 1;
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
 }
 
-#explorateur .badge { background-color: #FFF9C4; }
-#lecteur .badge { background-color: #BBDEFB; }
-#confiance .badge { background-color: #FFE0B2; }
-#premium .badge { background-color: #E1BEE7; }
+#explorateur.unlocked .badge { background-color: #FFF9C4; }
+#lecteur.unlocked .badge { background-color: #BBDEFB; }
+#confiance.unlocked .badge { background-color: #FFE0B2; }
+#premium.unlocked .badge { background-color: #E1BEE7; }
 
 .badge-name {
     font-weight: bold;
@@ -58,7 +51,7 @@ body {
 .badge-reward-display {
     font-size: 16px;
     font-weight: bold;
-    min-width: 200px;
+    margin-left: 20px;
 }
 
 .icon {
@@ -69,46 +62,40 @@ body {
 <body>
 
 <h2>Mes Badges</h2>
-<div class="badges-wrapper">
-    <div class="badges-list">
-        <div class="badge-row" id="explorateur">
-            <div class="badge">
-                <span class="icon">⭐</span>
-            </div>
-            <div class="badge-name">Explorateur</div>
-        </div>
-        <div class="badge-row" id="lecteur">
-            <div class="badge">
-                <span class="icon">📘</span>
-            </div>
-            <div class="badge-name">Lecteur</div>
-        </div>
-        <div class="badge-row" id="confiance">
-            <div class="badge">
-                <span class="icon">🔒</span>
-            </div>
-            <div class="badge-name">Confiance</div>
-        </div>
-        <div class="badge-row" id="premium">
-            <div class="badge">
-                <span class="icon">👑</span>
-            </div>
-            <div class="badge-name">Premium</div>
-        </div>
+<div class="badges-list">
+    <div class="badge-row" id="explorateur">
+        <div class="badge"><span class="icon">⭐</span></div>
+        <div class="badge-name">Explorateur</div>
+        <div class="badge-reward-display"></div>
     </div>
-    <div class="badge-reward-display" id="reward-display"></div>
+    <div class="badge-row" id="lecteur">
+        <div class="badge"><span class="icon">📘</span></div>
+        <div class="badge-name">Lecteur</div>
+        <div class="badge-reward-display"></div>
+    </div>
+    <div class="badge-row" id="confiance">
+        <div class="badge"><span class="icon">🔒</span></div>
+        <div class="badge-name">Confiance</div>
+        <div class="badge-reward-display"></div>
+    </div>
+    <div class="badge-row" id="premium">
+        <div class="badge"><span class="icon">👑</span></div>
+        <div class="badge-name">Premium</div>
+        <div class="badge-reward-display"></div>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
-   apiKey: "AIzaSyDHejsrQWjX3pab9M3_ybs-ULWFFxuHOcs",
+  apiKey: "AIzaSyDHejsrQWjX3pab9M3_ybs-ULWFFxuHOcs",
   authDomain: "info-newsletter-43e61.firebaseapp.com",
   projectId: "info-newsletter-43e61",
   storageBucket: "info-newsletter-43e61.firebasestorage.app",
   messagingSenderId: "668179612236",
   appId: "1:668179612236:web:3521121d19b62bf8a06ae9"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -161,19 +148,21 @@ if(uid){
 function displayBadges(badges, lastBadge){
     badges.forEach(b => {
         const elem = document.getElementById(b);
-        if(elem) elem.querySelector('.badge').classList.add('unlocked');
+        if(elem) {
+            elem.querySelector('.badge').classList.add('unlocked');
+            elem.classList.add('unlocked');
+        }
     });
 
     if(lastBadge){
-        const rewardDisplay = document.getElementById('reward-display');
-        let rewardText = '';
-        switch(lastBadge){
-            case 'explorateur': rewardText = 'Mini-guide bonus PDF'; break;
-            case 'lecteur': rewardText = 'Code promo -5% sur un Guide PDF (INFO5)'; break;
-            case 'confiance': rewardText = 'Code promo -2€ sur un Guide PDF (ASTUCE2)'; break;
-            case 'premium': rewardText = 'PDF gratuit (INFOFREE)'; break;
-        }
-        rewardDisplay.textContent = rewardText;
+        const rewardTextMap = {
+            explorateur: 'Mini-guide bonus PDF',
+            lecteur: 'Code promo -5% sur un Guide PDF (INFO5)',
+            confiance: 'Code promo -2€ sur un Guide PDF (ASTUCE2)',
+            premium: 'PDF gratuit (INFOFREE)'
+        };
+        const rewardDisplay = document.getElementById(lastBadge).querySelector('.badge-reward-display');
+        rewardDisplay.textContent = rewardTextMap[lastBadge];
     }
 }
 </script>

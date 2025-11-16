@@ -156,10 +156,10 @@ function displayBadges(badges, lastBadge){
 
     if(lastBadge){
         const rewardTextMap = {
-            explorateur: 'Mini-guide bonus PDF',
-            lecteur: 'Code promo -5% sur un Guide PDF (INFO5)',
-            confiance: 'Code promo -2€ sur un Guide PDF (ASTUCE2)',
-            premium: 'PDF gratuit (INFOFREE)'
+            explorateur: 'Vous avez obtenu le badge Explorateur en lisant notre Newsletter, bravo ! Pour vous remercier nous vous offrons un mini-guide bonus gratuit !',
+            lecteur: 'Vous avez obtenu le badge Lecteur en lisant 3 de nos Newsletter, bravo ! Pour vous remercier nous vous offrons un code promotionnel de -5% sur l un de nos Guides PDF de VOTRE choix. Choisissez l un de nos Guides et entre le code promo INFO5 pour en bénéficier à tout moment.',
+            confiance: 'Vous avez obtenu le badge Confiance en ayant cliqué sur l astuce présente dans notre Newsletter, bravo ! Pour vous remercier nous vous offrons un code promotionnel de 2€ sur l un de nos Guides PDF de VOTRE choix. Choisissez l un de nos Guides et entrez le code promo ASTUCE2 pour en bénéficier à tout moment.',
+            premium: 'Vous avez obtenu le badge Premium en ayant acheté l un de nos PDF gratuit par le biais de notre Newsletter, bravo ! Pour vous remercier nous vous offrons gratuitement un l un de nos Guides PDF de VOTRE choix. Choisissez l un de nos Guides et entrez le code promo INFOFREE pour en bénéficier à tout moment.'
         };
         const rewardDisplay = document.getElementById(lastBadge).querySelector('.badge-reward-display');
         rewardDisplay.textContent = rewardTextMap[lastBadge];
